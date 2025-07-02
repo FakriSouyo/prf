@@ -5,14 +5,14 @@ export interface Skill {
 }
 
 export const skills: Skill[] = [
-  { name: "NLTK", category: "ml", level: "advanced" },
-  { name: "GraphQL", category: "backend", level: "intermediate" },
-  { name: "Kubernetes", category: "devops", level: "intermediate" },
-  { name: "Rust", category: "backend", level: "beginner" },
-  { name: "RabbitMQ", category: "backend", level: "intermediate" },
-  { name: "Python", category: "backend", level: "expert" },
-  { name: "Docker", category: "devops", level: "advanced" },
-  { name: "AWS", category: "devops", level: "intermediate" },
+  { name: "NLP", category: "ml", level: "beginner" },
+  { name: "react", category: "frontend", level: "intermediate" },
+  { name: "nextjs", category: "frontend", level: "intermediate" },
+  { name: "supabase", category: "backend", level: "beginner" },
+  { name: "nodejs", category: "backend", level: "intermediate" },
+  { name: "golang", category: "backend", level: "intermediate" },
+  { name: "GCP", category: "devops", level: "intermediate" },
+  { name: "postgres", category: "database", level: "intermediate" },
 ]
 
 // For display purposes, we can extract just the names

@@ -148,10 +148,10 @@ export function ShareModal({ isOpen, onClose, title, url }: ShareModalProps) {
                           <div
                             className={`w-10 h-10 rounded-full ${option.color} flex items-center justify-center text-white transition-colors`}
                           >
-                            {typeof IconComponent === "function" ? (
-                              <IconComponent />
+                            {typeof option.icon === "function" && option.icon.length === 0 ? (
+                              <option.icon />
                             ) : (
-                              <IconComponent className="w-5 h-5" />
+                              <option.icon className="w-5 h-5" />
                             )}
                           </div>
                           <span className="text-xs font-medium group-hover:text-foreground transition-colors">

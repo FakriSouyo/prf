@@ -34,9 +34,11 @@ export function EnhancedProjectCard({ project, onClick, index }: ProjectCardProp
           <Image
             src={project.image || "/placeholder.svg"}
             alt={project.title}
-            width={300}
-            height={300}
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            className="object-cover group-hover:scale-110 transition-transform duration-500"
+            quality={85}
+            priority={index < 2} // Prioritize loading first 2 images
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
@@ -54,7 +56,14 @@ export function EnhancedProjectCard({ project, onClick, index }: ProjectCardProp
               View
             </Button>
             {project.github && (
-              <Button size="sm" variant="secondary" onClick={(e) => e.stopPropagation()}>
+              <Button 
+                size="sm" 
+                variant="secondary" 
+                onClick={(e) => {
+                  e.stopPropagation()
+                  window.open(project.github, '_blank', 'noopener,noreferrer')
+                }}
+              >
                 <Github className="w-4 h-4 mr-1" />
                 Code
               </Button>

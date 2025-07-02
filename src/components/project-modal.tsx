@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { useEffect, useState } from "react"
+import { ProjectDetail } from "@/components/project-detail"
 
 interface ProjectModalProps {
   project: {
@@ -22,6 +23,7 @@ interface ProjectModalProps {
 
 export function ProjectModal({ project, onClose }: ProjectModalProps) {
   const [isVisible, setIsVisible] = useState(false)
+  const [showDetail, setShowDetail] = useState(false)
 
   useEffect(() => {
     // Trigger animation after component mounts
@@ -36,6 +38,11 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
   }, [])
 
   const handleClose = () => {
+    if (showDetail) {
+      setShowDetail(false)
+      return
+    }
+    
     setIsVisible(false)
     // Delay actual close to allow animation to complete
     setTimeout(() => {
@@ -86,7 +93,13 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
                 <h2 className="text-2xl font-semibold mb-1">{project.title}</h2>
                 <p className="text-muted-foreground">{project.subtitle}</p>
               </div>
-              <Button className="ml-4 hover:scale-105 transition-transform duration-200">
+              <Button 
+                className="ml-4 hover:scale-105 transition-transform duration-200"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setShowDetail(true)
+                }}
+              >
                 <ExternalLink className="w-4 h-4 mr-2" />
                 Visit
               </Button>
@@ -109,6 +122,13 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
           </div>
         </CardContent>
       </Card>
+
+      {showDetail && (
+        <ProjectDetail
+          project={project}
+          onClose={() => setShowDetail(false)}
+        />
+      )}
     </div>
   )
 }

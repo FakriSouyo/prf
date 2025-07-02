@@ -19,13 +19,10 @@ export function BlogSheet({ post, onClose }: BlogSheetProps) {
   const y = useMotionValue(0)
   const constraintsRef = useRef<HTMLDivElement>(null)
 
-  // Transform values for smooth animations
-  const opacity = useTransform(y, [0, 300], [1, 0])
-  const scale = useTransform(y, [0, 300], [1, 0.8])
-
   useEffect(() => {
     if (post) {
       setIsVisible(true)
+      setIsFullScreen(false) // Reset ke half screen setiap kali dibuka
       document.body.style.overflow = "hidden"
     } else {
       document.body.style.overflow = "unset"
@@ -39,6 +36,7 @@ export function BlogSheet({ post, onClose }: BlogSheetProps) {
   const handleClose = () => {
     setIsVisible(false)
     setTimeout(() => {
+      setIsFullScreen(false) // Reset state saat tutup
       onClose()
     }, 300)
   }
@@ -51,34 +49,40 @@ export function BlogSheet({ post, onClose }: BlogSheetProps) {
       handleClose()
     } else if (shouldFullScreen && !isFullScreen) {
       setIsFullScreen(true)
+    } else if (!shouldClose && !shouldFullScreen) {
+      // Snap back to current position
+      y.set(0)
     }
   }
 
   const handleBookmark = () => {
-    if (post) {
-      // Add bookmark to browser
-      const url = `${window.location.origin}/blog/${post.id}`
-      const title = post.title
+    if (!post) return
 
-      // Try to add bookmark (works in some browsers)
-      if (window.sidebar && window.sidebar.addPanel) {
-        // Firefox
-        window.sidebar.addPanel(title, url, "")
-      } else if (window.external && "AddFavorite" in window.external) {
-        // Internet Explorer
-        window.external.AddFavorite(url, title)
-      } else {
-        // For other browsers, we can't directly add bookmarks due to security restrictions
-        // So we'll copy the URL and show a message
-        navigator.clipboard
-          .writeText(url)
-          .then(() => {
-            alert(`Bookmark saved! Press Ctrl+D (Cmd+D on Mac) to bookmark this page.\nURL copied to clipboard: ${url}`)
-          })
-          .catch(() => {
-            alert(`Press Ctrl+D (Cmd+D on Mac) to bookmark this page: ${title}`)
-          })
-      }
+    // Add bookmark to browser
+    const url = `${window.location.origin}/blog/${post.id}`
+    const title = post.title
+
+    // Type assertion for browser-specific properties
+    const win = window as any;
+    
+    // Try to add bookmark (works in some browsers)
+    if (win.sidebar?.addPanel) {
+      // Firefox
+      win.sidebar.addPanel(title, url, "")
+    } else if (win.external?.AddFavorite) {
+      // Internet Explorer
+      win.external.AddFavorite(url, title)
+    } else {
+      // For other browsers, we can't directly add bookmarks due to security restrictions
+      // So we'll copy the URL and show a message
+      navigator.clipboard
+        .writeText(url)
+        .then(() => {
+          alert(`Bookmark saved! Press Ctrl+D (Cmd+D on Mac) to bookmark this page.\nURL copied to clipboard: ${url}`)
+        })
+        .catch(() => {
+          alert(`Press Ctrl+D (Cmd+D on Mac) to bookmark this page: ${title}`)
+        })
     }
   }
 
@@ -106,7 +110,6 @@ export function BlogSheet({ post, onClose }: BlogSheetProps) {
             y: isVisible ? (isFullScreen ? 0 : "30%") : "100%",
           }}
           transition={{ type: "spring", damping: 30, stiffness: 300 }}
-          style={{ opacity, scale }}
         >
           <motion.div
             className="relative h-full bg-background rounded-t-3xl shadow-2xl overflow-hidden flex flex-col"
@@ -205,7 +208,7 @@ export function BlogSheet({ post, onClose }: BlogSheetProps) {
               </div>
             </div>
 
-            {/* Pull Indicator - Only show pull up */}
+            {/* Pull Indicator - Only show when not full screen */}
             {!isFullScreen && (
               <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
                 <div className="flex flex-col items-center text-muted-foreground">
