@@ -1,103 +1,193 @@
-import Image from "next/image";
+"use client"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { CookieConsent } from "@/components/cookie-consent"
+import { ThemeToggle } from "@/components/theme-toggle"
+import { MovingBorderCard } from "@/components/moving-border"
+import { ScrollProgress } from "@/components/scroll-progress"
+import { FloatingNav } from "@/components/floating-nav"
+import { SectionReveal } from "@/components/section-reveal"
+import { EnhancedSkills } from "@/components/enhanced-skills"
+import { BlogSheet } from "@/components/blog-sheet"
+import { DecodingText } from "@/components/decoding-text"
+import { useState } from "react"
+import { ProjectModal } from "@/components/project-modal"
+import { motion } from "framer-motion"
+import { Mail, MapPin } from "lucide-react"
+import { ProjectCarousel } from "@/components/project-carousel"
 
-export default function Home() {
+// Import data directly from individual files
+import { personalInfo } from "@/data/personal"
+import { projects } from "@/data/projects"
+import { skillNames } from "@/data/skills"
+import { experiences } from "@/data/experience"
+import { education } from "@/data/education"
+import { blogPosts } from "@/data/blog"
+import { socialLinks } from "@/data/social"
+import type { BlogPost } from "@/data/blog"
+
+export default function Portfolio() {
+  const [selectedProject, setSelectedProject] = useState<any>(null)
+  const [selectedBlogPost, setSelectedBlogPost] = useState<BlogPost | null>(null)
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
+      <ScrollProgress />
+      <FloatingNav />
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      <div className="max-w-4xl mx-auto px-6 py-12">
+        {/* Header */}
+        <SectionReveal>
+          <header className="flex justify-between items-start mb-12">
+            <motion.div initial={{ opacity: 0, x: -50 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6 }}>
+              <h1 className="text-2xl font-semibold mb-1">{personalInfo.name}</h1>
+              <p className="text-muted-foreground mb-2">{personalInfo.title}</p>
+              <div className="flex items-center gap-4 text-sm text-muted-foreground mb-6">
+                <div className="flex items-center gap-1">
+                  <MapPin className="w-4 h-4" />
+                  <span>{personalInfo.location}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Mail className="w-4 h-4" />
+                  <span>{personalInfo.status}</span>
+                </div>
+              </div>
+              <p className="text-sm text-muted-foreground max-w-md leading-relaxed">{personalInfo.description}</p>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+            >
+              <Button variant="ghost" className="hover:bg-transparent">
+                <DecodingText text="DOWNLOAD RESUME" className="font-medium" />
+              </Button>
+            </motion.div>
+          </header>
+        </SectionReveal>
+
+        {/* Projects */}
+        <SectionReveal delay={0.1}>
+          <section className="mb-16">
+            <h2 className="text-lg font-medium mb-8">Projects</h2>
+            <ProjectCarousel projects={projects} onProjectClick={setSelectedProject} />
+          </section>
+        </SectionReveal>
+
+        {/* Skills */}
+        <SectionReveal delay={0.2}>
+          <section className="mb-16">
+            <EnhancedSkills skills={skillNames} />
+          </section>
+        </SectionReveal>
+
+        {/* Experience */}
+        <SectionReveal delay={0.3}>
+          <section className="mb-16">
+            <h2 className="text-lg font-medium mb-8">Experience</h2>
+            <div className="space-y-4">
+              {experiences.map((exp, index) => (
+                <motion.div
+                  key={exp.id}
+                  initial={{ opacity: 0, x: -50 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                >
+                  <MovingBorderCard borderRadius="15px" className="p-6" duration={4000}>
+                    <div className="flex justify-between items-start w-full">
+                      <div className="flex-1">
+                        <h3 className="font-medium">{exp.role}</h3>
+                        <p className="text-sm text-muted-foreground mb-2">{exp.company}</p>
+                        <p className="text-xs text-muted-foreground">{exp.description}</p>
+                      </div>
+                      <p className="text-sm text-muted-foreground ml-4">{exp.period}</p>
+                    </div>
+                  </MovingBorderCard>
+                </motion.div>
+              ))}
+            </div>
+          </section>
+        </SectionReveal>
+
+        {/* Education */}
+        <SectionReveal delay={0.4}>
+          <section className="mb-16">
+            <h2 className="text-lg font-medium mb-8">Education</h2>
+            {education.map((edu) => (
+              <MovingBorderCard key={edu.id} borderRadius="15px" className="p-6" duration={4000}>
+                <div className="flex justify-between items-start w-full">
+                  <div>
+                    <h3 className="font-medium">{edu.degree}</h3>
+                    <p className="text-sm text-muted-foreground">{edu.institution}</p>
+                  </div>
+                  <p className="text-sm text-muted-foreground">{edu.period}</p>
+                </div>
+              </MovingBorderCard>
+            ))}
+          </section>
+        </SectionReveal>
+
+        {/* Blog */}
+        <SectionReveal delay={0.5}>
+          <section className="mb-16">
+            <h2 className="text-lg font-medium mb-8">Blog</h2>
+            <div className="grid md:grid-cols-2 gap-6">
+              {blogPosts
+                .filter((post) => post.featured)
+                .map((post) => (
+                  <motion.div
+                    key={post.id}
+                    whileHover={{ scale: 1.02 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                    onClick={() => setSelectedBlogPost(post)}
+                  >
+                    <Card className="cursor-pointer hover:shadow-lg transition-all duration-300 rounded-2xl overflow-hidden group">
+                      <CardContent className="p-0 relative">
+                        <div className="aspect-square bg-gradient-to-br from-blue-900 to-blue-700" />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/60 transition-all duration-300 flex items-end">
+                          <div className="p-4 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <h3 className="font-semibold mb-1">{post.title}</h3>
+                            <p className="text-sm text-white/80 mb-2">{post.subtitle}</p>
+                            <p className="text-xs text-white/70">{post.description}</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ))}
+            </div>
+          </section>
+        </SectionReveal>
+
+        {/* Connect */}
+        <SectionReveal delay={0.6}>
+          <section className="mb-16">
+            <h2 className="text-lg font-medium mb-6">Connect</h2>
+            <p className="text-sm text-muted-foreground mb-4">You can always connect with me at {personalInfo.email}</p>
+            <div className="flex gap-4">
+              {socialLinks.map((social) => (
+                <motion.div key={social.name} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Button variant="ghost" size="sm" className="px-4 py-2">
+                    {social.name} ↗
+                  </Button>
+                </motion.div>
+              ))}
+            </div>
+          </section>
+        </SectionReveal>
+
+        {/* Footer */}
+        <footer className="pt-8 border-t border-border">
+          <div className="flex justify-between items-center text-xs text-muted-foreground">
+            <p>© 2025 {personalInfo.name}</p>
+            <ThemeToggle />
+          </div>
+        </footer>
+      </div>
+
+      {selectedProject && <ProjectModal project={selectedProject} onClose={() => setSelectedProject(null)} />}
+      <BlogSheet post={selectedBlogPost} onClose={() => setSelectedBlogPost(null)} />
+      <CookieConsent />
     </div>
-  );
+  )
 }
