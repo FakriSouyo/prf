@@ -13,10 +13,12 @@ import { DecodingText } from "@/components/decoding-text"
 import { useState, useEffect, useCallback } from "react"
 import { ProjectModal } from "@/components/project-modal"
 import { motion } from "framer-motion"
-import { Mail, MapPin, Calendar, ChevronLeft, ChevronRight } from "lucide-react"
+import { Mail, MapPin, Calendar, ChevronLeft, ChevronRight, Download } from "lucide-react"
 import { ProjectCarousel } from "@/components/project-carousel"
 import { Badge } from "@/components/ui/badge"
+import { toast } from "sonner"
 import Image from "next/image"
+import Link from "next/link"
 import useEmblaCarousel from 'embla-carousel-react'
 
 // Import data directly from individual files
@@ -72,6 +74,36 @@ export default function Portfolio() {
     fetchBlogPosts()
   }, [])
 
+  const handleDownloadResume = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    
+    // Show toast first
+    toast.success("Thanks for your interest!", {
+      description: "",
+      duration: 10000,
+    })
+
+    try {
+      // Create a temporary link element
+      const link = document.createElement('a')
+      link.href = personalInfo.resumeUrl
+      link.setAttribute('download', '') // Force download
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+    } catch (error) {
+      console.error('Download failed:', error)
+      toast.error("Download failed", {
+        description: "Please try again later.",
+        duration: 3000,
+      })
+    }
+  }
+
+  const handleSocialClick = (url: string) => {
+    window.open(url, '_blank', 'noopener,noreferrer')
+  }
+
   return (
     <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
       <ScrollProgress />
@@ -99,7 +131,12 @@ export default function Portfolio() {
               </div>
               <p className="text-sm text-muted-foreground max-w-md leading-relaxed">{personalInfo.description}</p>
               <div className="block md:hidden -ml-4 mt-6">
-                <Button variant="ghost" className="hover:!bg-transparent !bg-transparent">
+                <Button 
+                  variant="ghost" 
+                  className="hover:!bg-transparent !bg-transparent"
+                  onClick={handleDownloadResume}
+                >
+                  <Download className="w-4 h-4 mr-2" />
                   <DecodingText text="DOWNLOAD RESUME" className="font-medium" />
                 </Button>
               </div>
@@ -110,7 +147,12 @@ export default function Portfolio() {
               transition={{ duration: 0.6, delay: 0.2 }}
               className="hidden md:block"
             >
-              <Button variant="ghost" className="hover:!bg-transparent !bg-transparent">
+              <Button 
+                variant="ghost" 
+                className="hover:!bg-transparent !bg-transparent"
+                onClick={handleDownloadResume}
+              >
+                <Download className="w-4 h-4 mr-2" />
                 <DecodingText text="DOWNLOAD RESUME" className="font-medium" />
               </Button>
             </motion.div>
@@ -284,7 +326,12 @@ export default function Portfolio() {
             <div className="flex gap-4">
               {socialLinks.map((social) => (
                 <motion.div key={social.name} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Button variant="ghost" size="sm" className="px-4 py-2">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="px-4 py-2"
+                    onClick={() => handleSocialClick(social.url)}
+                  >
                     {social.name} ↗
                   </Button>
                 </motion.div>

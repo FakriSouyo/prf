@@ -8,17 +8,17 @@ export interface SocialLink {
 export const socialLinks: SocialLink[] = [
   {
     name: "GitHub",
-    url: "https://github.com/fakhriabdillah",
+    url: "https://github.com/FakriSouyo",
     username: "@fakhriabdillah",
   },
   {
     name: "LinkedIn",
-    url: "https://linkedin.com/in/fakhriabdillah",
+    url: "https://www.linkedin.com/in/fakriab/",
     username: "fakhriabdillah",
   },
   {
     name: "Spotify",
-    url: "https://open.spotify.com/user/fakhriabdillah",
+    url: "www.linkedin.com/in/fakriab",
     username: "fakhriabdillah",
   },
 ]

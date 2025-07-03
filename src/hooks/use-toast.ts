@@ -1,6 +1,6 @@
 "use client"
 
-// Inspired by react-hot-toast library
+// Adapted from https://github.com/shadcn-ui/ui/blob/main/packages/core/use-toast.ts
 import * as React from "react"
 
 import type {
@@ -9,7 +9,7 @@ import type {
 } from "@/components/ui/toast"
 
 const TOAST_LIMIT = 1
-const TOAST_REMOVE_DELAY = 1000000
+const TOAST_REMOVE_DELAY = 3000
 
 type ToasterToast = ToastProps & {
   id: string
@@ -28,7 +28,7 @@ const actionTypes = {
 let count = 0
 
 function genId() {
-  count = (count + 1) % Number.MAX_SAFE_INTEGER
+  count = (count + 1) % Number.MAX_VALUE
   return count.toString()
 }
 

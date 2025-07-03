@@ -1,10 +1,9 @@
 "use client"
 import { useState, useEffect, useRef } from "react"
 import { motion, useMotionValue, useTransform, type PanInfo } from "framer-motion"
-import { X, Calendar, Bookmark, Share2, AlertTriangle, Info, Lightbulb, AlertCircle } from "lucide-react"
+import { X, Calendar, AlertTriangle, Info, Lightbulb, AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ShareModal } from "@/components/share-modal"
 import type { BlogPost } from "@/data/blog"
 import { MDXRemote } from 'next-mdx-remote'
 import Image from "next/image"
@@ -305,7 +304,6 @@ const mdxComponents = {
 export function BlogSheet({ post, onClose }: BlogSheetProps) {
   const [isVisible, setIsVisible] = useState(false)
   const [isFullScreen, setIsFullScreen] = useState(false)
-  const [showShareModal, setShowShareModal] = useState(false)
   const [mdxContent, setMdxContent] = useState<any>(null)
   const y = useMotionValue(0)
   const constraintsRef = useRef<HTMLDivElement>(null)
@@ -357,38 +355,7 @@ export function BlogSheet({ post, onClose }: BlogSheetProps) {
     }
   }
 
-  const handleBookmark = () => {
-    if (!post) return
-
-    const url = `${window.location.origin}/blog/${post.slug}`
-    const title = post.title
-
-    // Type assertion for browser-specific properties
-    const win = window as any;
-    
-    if (win.sidebar?.addPanel) {
-      win.sidebar.addPanel(title, url, "")
-    } else if (win.external?.AddFavorite) {
-      win.external.AddFavorite(url, title)
-    } else {
-      navigator.clipboard
-        .writeText(url)
-        .then(() => {
-          alert(`Bookmark saved! Press Ctrl+D (Cmd+D on Mac) to bookmark this page.\nURL copied to clipboard: ${url}`)
-        })
-        .catch(() => {
-          alert(`Press Ctrl+D (Cmd+D on Mac) to bookmark this page: ${title}`)
-        })
-    }
-  }
-
-  const handleShare = () => {
-    setShowShareModal(true)
-  }
-
   if (!post) return null
-
-  const currentUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/blog/${post.slug}`
 
   return (
     <>
@@ -474,18 +441,6 @@ export function BlogSheet({ post, onClose }: BlogSheetProps) {
                     />
                   )}
                 </article>
-
-                {/* Action Buttons */}
-                <div className="flex gap-4 mt-12 pt-6 border-t border-border">
-                  <Button variant="outline" onClick={handleShare}>
-                    <Share2 className="w-4 h-4 mr-2" />
-                    Share
-                  </Button>
-                  <Button variant="outline" onClick={handleBookmark}>
-                    <Bookmark className="w-4 h-4 mr-2" />
-                    Bookmark
-                  </Button>
-                </div>
               </div>
             </div>
 
@@ -503,14 +458,6 @@ export function BlogSheet({ post, onClose }: BlogSheetProps) {
           </motion.div>
         </motion.div>
       </div>
-
-      {/* Share Modal */}
-      <ShareModal
-        isOpen={showShareModal}
-        onClose={() => setShowShareModal(false)}
-        title={post?.title || ""}
-        url={currentUrl}
-      />
     </>
   )
 }
