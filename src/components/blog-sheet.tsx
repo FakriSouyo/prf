@@ -8,7 +8,6 @@ import { ShareModal } from "@/components/share-modal"
 import type { BlogPost } from "@/data/blog"
 import { MDXRemote } from 'next-mdx-remote'
 import Image from "next/image"
-import { useToast } from "@/hooks/use-toast"
 
 interface BlogSheetProps {
   post: BlogPost | null
@@ -308,20 +307,14 @@ export function BlogSheet({ post, onClose }: BlogSheetProps) {
   const [isFullScreen, setIsFullScreen] = useState(false)
   const [showShareModal, setShowShareModal] = useState(false)
   const [mdxContent, setMdxContent] = useState<any>(null)
-  const [isBookmarked, setIsBookmarked] = useState(false)
   const y = useMotionValue(0)
   const constraintsRef = useRef<HTMLDivElement>(null)
-  const { toast } = useToast()
 
   useEffect(() => {
     if (post) {
       setIsVisible(true)
       setIsFullScreen(false)
       document.body.style.overflow = "hidden"
-      
-      // Update URL to article URL without reloading
-      const articleUrl = `/blog/${post.slug}`
-      window.history.pushState({}, '', articleUrl)
       
       // Fetch MDX content when post changes
       const fetchContent = async () => {
@@ -336,16 +329,10 @@ export function BlogSheet({ post, onClose }: BlogSheetProps) {
       fetchContent()
     } else {
       document.body.style.overflow = "unset"
-      // Restore original URL when closing
-      window.history.pushState({}, '', '/')
     }
 
     return () => {
       document.body.style.overflow = "unset"
-      // Restore original URL when unmounting
-      if (!post) {
-        window.history.pushState({}, '', '/')
-      }
     }
   }, [post])
 
@@ -373,34 +360,26 @@ export function BlogSheet({ post, onClose }: BlogSheetProps) {
   const handleBookmark = () => {
     if (!post) return
 
-    const articleUrl = `${window.location.origin}/blog/${post.slug}`
+    const url = `${window.location.origin}/blog/${post.slug}`
+    const title = post.title
+
+    // Type assertion for browser-specific properties
+    const win = window as any;
     
-    // Change the current URL to the article URL
-    window.location.href = articleUrl
-
-    const shortcut = navigator.platform.toUpperCase().indexOf('MAC') >= 0 ? '⌘+D' : 'Ctrl+D'
-
-    // Copy URL to clipboard
-    navigator.clipboard.writeText(articleUrl)
-      .then(() => {
-        toast({
-          title: "Ready to bookmark",
-          description: `Press ${shortcut} now to bookmark this article. URL copied to clipboard!`,
-          duration: 5000,
+    if (win.sidebar?.addPanel) {
+      win.sidebar.addPanel(title, url, "")
+    } else if (win.external?.AddFavorite) {
+      win.external.AddFavorite(url, title)
+    } else {
+      navigator.clipboard
+        .writeText(url)
+        .then(() => {
+          alert(`Bookmark saved! Press Ctrl+D (Cmd+D on Mac) to bookmark this page.\nURL copied to clipboard: ${url}`)
         })
-      })
-      .catch(() => {
-        toast({
-          title: "Ready to bookmark",
-          description: `Press ${shortcut} now to bookmark this article.`,
-          duration: 5000,
+        .catch(() => {
+          alert(`Press Ctrl+D (Cmd+D on Mac) to bookmark this page: ${title}`)
         })
-      })
-
-    // Add event listener for the next navigation to restore the URL
-    window.addEventListener('popstate', () => {
-      window.location.href = window.location.origin
-    }, { once: true })
+    }
   }
 
   const handleShare = () => {
@@ -409,10 +388,7 @@ export function BlogSheet({ post, onClose }: BlogSheetProps) {
 
   if (!post) return null
 
-  // Get the current article URL
-  const articleUrl = typeof window !== "undefined" 
-    ? `${window.location.origin}/blog/${post.slug}`
-    : `/blog/${post.slug}`
+  const currentUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/blog/${post.slug}`
 
   return (
     <>
@@ -533,7 +509,7 @@ export function BlogSheet({ post, onClose }: BlogSheetProps) {
         isOpen={showShareModal}
         onClose={() => setShowShareModal(false)}
         title={post?.title || ""}
-        url={articleUrl}
+        url={currentUrl}
       />
     </>
   )

@@ -7,8 +7,6 @@ tags: ["Web Development", "Performance", "Optimization", "JavaScript", "React", 
 featured: true
 image: "/blog/web-performance.jpg"
 status: "published"
-slug: "web-performance-optimization"
-url: "/blog/web-performance-optimization"
 ---
 
 # Complete Web Performance Optimization Guide
@@ -130,14 +128,14 @@ export function AdvancedOptimizedImage({ src, alt, priority = false }) {
 
   return (
     <div className="relative overflow-hidden">
-      <Image
+    <Image
         src={src}
         alt={alt}
         fill
         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         priority={priority}
         quality={85}
-        placeholder="blur"
+      placeholder="blur"
         blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQ..."
         onLoad={() => setIsLoading(false)}
         onError={() => {
