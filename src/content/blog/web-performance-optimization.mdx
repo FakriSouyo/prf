@@ -24,7 +24,7 @@ Google's Core Web Vitals are the essential metrics that measure real-world user 
 ### Largest Contentful Paint (LCP)
 The LCP metric reports the render time of the largest image or text block visible within the viewport. **Good LCP scores are 2.5 seconds or faster**.
 
-```javascript
+```javascript title="core-web-vitals.js" meta="Performance Monitoring"
 // Advanced LCP measurement with detailed logging
 new PerformanceObserver((entryList) => {
   for (const entry of entryList.getEntries()) {
@@ -56,7 +56,7 @@ To improve LCP, focus on optimizing server response times, render-blocking resou
 ### First Input Delay (FID)
 FID measures the time from when a user first interacts with your site (clicks a link, taps a button, etc.) to the time when the browser is able to respond to that interaction.
 
-```typescript
+```typescript title="fid-monitoring.ts" meta="Performance Metrics"
 // FID measurement and optimization detection
 interface FIDEntry extends PerformanceEntry {
   processingStart: number;
@@ -85,7 +85,7 @@ new PerformanceObserver((entryList) => {
 ### Cumulative Layout Shift (CLS)
 CLS measures visual stability by quantifying how much visible content shifts during page load.
 
-```javascript
+```javascript title="cls-tracker.js" meta="Layout Stability"
 // Advanced CLS tracking with element identification
 let clsValue = 0;
 let clsEntries = [];
@@ -117,7 +117,7 @@ new PerformanceObserver((entryList) => {
 
 Modern image optimization goes beyond simple compression:
 
-```jsx
+```tsx title="components/AdvancedOptimizedImage.tsx" meta="Next.js Component"
 // Next.js 14 Image component with advanced optimization
 import Image from 'next/image'
 import { useState } from 'react'
@@ -128,14 +128,14 @@ export function AdvancedOptimizedImage({ src, alt, priority = false }) {
 
   return (
     <div className="relative overflow-hidden">
-    <Image
+      <Image
         src={src}
         alt={alt}
         fill
         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         priority={priority}
         quality={85}
-      placeholder="blur"
+        placeholder="blur"
         blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQ..."
         onLoad={() => setIsLoading(false)}
         onError={() => {
@@ -169,7 +169,7 @@ Modern browsers support WebP and AVIF formats which can reduce image sizes by 25
 
 ### 2. Smart Code Splitting Strategies
 
-```typescript
+```typescript title="utils/withLazyLoading.ts" meta="Code Splitting"
 // Advanced code splitting with error boundaries
 import { lazy, Suspense, ComponentType } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
@@ -197,16 +197,6 @@ function withLazyLoading<T extends object>(
     )
   }
 }
-
-// Usage examples
-const DashboardChart = withLazyLoading(
-  () => import('./components/DashboardChart'),
-  () => <div className="animate-pulse bg-gray-200 h-64 rounded" />
-)
-
-const AdminPanel = withLazyLoading(
-  () => import('./pages/AdminPanel')
-)
 ```
 
 ### 3. Advanced Caching Strategies

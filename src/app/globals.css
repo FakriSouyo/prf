@@ -120,3 +120,54 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Syntax Highlighting */
+.prose-custom {
+  /* ... existing prose styles ... */
+  
+  /* Code Block Styles */
+  pre {
+    @apply relative;
+  }
+
+  pre > code {
+    @apply grid;
+    counter-reset: line;
+  }
+
+  pre > code > .line {
+    @apply px-4 py-0.5 border-l-2 border-l-transparent;
+    counter-increment: line;
+  }
+
+  pre > code > .line::before {
+    @apply text-zinc-500 dark:text-zinc-400 mr-4 inline-block w-4 text-right;
+    content: counter(line);
+  }
+
+  pre > code > .line.highlighted {
+    @apply border-l-blue-500 bg-blue-500/10;
+  }
+
+  pre > code > .line .word {
+    @apply rounded bg-zinc-300/20 dark:bg-zinc-700/50 p-1;
+  }
+
+  /* Inline Code */
+  :not(pre) > code {
+    @apply px-1.5 py-0.5 text-[0.9em] bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded font-mono border border-zinc-300 dark:border-zinc-700;
+  }
+
+  /* Light/Dark Mode Specific Styles */
+  @media (prefers-color-scheme: light) {
+    pre {
+      @apply bg-zinc-950;
+    }
+  }
+
+  @media (prefers-color-scheme: dark) {
+    pre {
+      @apply bg-zinc-900;
+    }
+  }
+}

@@ -48,7 +48,7 @@ export function ProjectDetail({ project, onClose }: ProjectDetailProps) {
     setIsDragging(true)
   }
 
-  const handleDragEnd = (event: any, info: PanInfo) => {
+  const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     setIsDragging(false)
     
     if (Math.abs(info.offset.y) < 10) {

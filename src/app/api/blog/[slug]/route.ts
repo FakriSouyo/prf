@@ -5,8 +5,38 @@ import matter from 'gray-matter'
 import { serialize } from 'next-mdx-remote/serialize'
 import rehypeExpressiveCode from 'rehype-expressive-code'
 import remarkGfm from 'remark-gfm'
+import rehypePrettyCode from 'rehype-pretty-code'
 
 const POSTS_PATH = path.join(process.cwd(), 'src/content/blog')
+
+// Type for line node
+interface LineNode {
+  children: Array<{ type: string; value: string }>
+  properties: { className: string[] }
+}
+
+const prettyCodeOptions = {
+  theme: {
+    dark: 'github-dark',
+    light: 'github-light'
+  },
+  keepBackground: false,
+  defaultLang: 'plaintext',
+  onVisitLine(node: LineNode) {
+    if (node.children.length === 0) {
+      node.children = [{
+        type: 'text',
+        value: ' '
+      }]
+    }
+  },
+  onVisitHighlightedLine(node: LineNode) {
+    node.properties.className.push('highlighted')
+  },
+  onVisitHighlightedWord(node: LineNode) {
+    node.properties.className = ['word']
+  },
+}
 
 export async function GET(
   _request: NextRequest,
@@ -34,6 +64,7 @@ export async function GET(
     
     const mdxContent = await serialize(content, {
       mdxOptions: {
+        remarkPlugins: [remarkGfm],
         rehypePlugins: [
           [rehypeExpressiveCode, {
             frames: true,
@@ -41,6 +72,7 @@ export async function GET(
             lineNumbers: true,
             tabSize: 2,
           }],
+          [rehypePrettyCode, prettyCodeOptions]
         ],
       },
       scope: data,

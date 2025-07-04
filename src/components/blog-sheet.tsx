@@ -1,16 +1,59 @@
 "use client"
-import { useState, useEffect, useRef } from "react"
-import { motion, useMotionValue, useTransform, type PanInfo } from "framer-motion"
-import { X, Calendar, AlertTriangle, Info, Lightbulb, AlertCircle } from "lucide-react"
+import { useState, useEffect, useRef, useMemo } from "react"
+import { motion, useMotionValue, type PanInfo, animate } from "framer-motion"
+import { X, Calendar, AlertTriangle, Info, Lightbulb, AlertCircle, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import type { BlogPost } from "@/data/blog"
-import { MDXRemote } from 'next-mdx-remote'
 import Image from "next/image"
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { EnhancedCodeBlock } from './enhanced-codeblock'
+import { MDXRemote } from 'next-mdx-remote'
+import type { MDXRemoteSerializeResult } from 'next-mdx-remote'
+import React from "react"
 
 interface BlogSheetProps {
   post: BlogPost | null
   onClose: () => void
+}
+
+interface BlogContent {
+  content: MDXRemoteSerializeResult
+  frontmatter?: Record<string, unknown>
+}
+
+interface CodeProps {
+  children: React.ReactNode
+  className?: string
+  title?: string
+  meta?: string
+  filename?: string
+  [key: string]: unknown
+}
+
+interface PreProps {
+  children: React.ReactNode
+  [key: string]: unknown
+}
+
+// Helper function to extract text content from React nodes
+const getTextContent = (node: React.ReactNode): string => {
+  if (typeof node === 'string') {
+    return node
+  }
+  if (typeof node === 'number') {
+    return node.toString()
+  }
+  if (React.isValidElement(node)) {
+    // Safely access children from React element
+    const element = node as React.ReactElement<{ children?: React.ReactNode }>
+    const children = element.props?.children
+    return children ? getTextContent(children) : ''
+  }
+  if (Array.isArray(node)) {
+    return node.map(getTextContent).join('')
+  }
+  return ''
 }
 
 // Custom Admonition Component
@@ -69,61 +112,6 @@ const Admonition = ({ type, children }: { type: string; children: React.ReactNod
   )
 }
 
-// Custom Code Block Component
-const CodeBlock = ({ children, className, title, meta }: { children: string; className?: string; title?: string; meta?: string }) => {
-  const language = className?.replace('language-', '') || 'text'
-  
-  return (
-    <div className="my-6 overflow-hidden font-mono">
-      <div className="bg-[#24292e] dark:bg-[#0d1117] rounded-lg overflow-hidden">
-        {/* Editor Frame */}
-        <div className="flex items-center justify-between px-4 py-2 bg-[#1f2428] dark:bg-[#161b22] border-b border-[#30363d]">
-          {/* File name or title */}
-          <div className="flex items-center">
-            {title && (
-              <span className="text-sm text-gray-300">
-                {title}
-              </span>
-            )}
-            {!title && language && (
-              <span className="text-sm text-gray-400">
-                {language}
-              </span>
-            )}
-          </div>
-          {/* Meta info or language badge */}
-          {meta && (
-            <span className="text-xs text-gray-400 bg-[#30363d] px-2 py-1 rounded">
-              {meta}
-            </span>
-          )}
-        </div>
-        
-        {/* Code Content */}
-        <div className="relative group">
-          <pre className="overflow-x-auto p-4 text-sm leading-6">
-            <code className={`language-${language} text-gray-300`}>
-              {children}
-            </code>
-          </pre>
-          
-          {/* Copy button */}
-          <button
-            onClick={() => navigator.clipboard.writeText(children)}
-            className="absolute top-3 right-3 p-2 rounded-lg bg-[#30363d] opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-white"
-            title="Copy code"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-            </svg>
-          </button>
-        </div>
-      </div>
-    </div>
-  )
-}
-
 // Custom Table Component
 const Table = ({ children }: { children: React.ReactNode }) => (
   <div className="my-6 overflow-x-auto">
@@ -152,7 +140,9 @@ const TableCell = ({ children, isHeader }: { children: React.ReactNode; isHeader
 )
 
 // MDX Components
-const mdxComponents = {
+import type { MDXComponents } from 'mdx/types';
+
+const mdxComponents: MDXComponents = {
   // Headings
   h1: ({ children }: { children: React.ReactNode }) => (
     <h1 className="text-4xl font-bold mb-6 mt-8 text-gray-900 dark:text-gray-100 leading-tight">
@@ -175,7 +165,7 @@ const mdxComponents = {
     </h4>
   ),
   h5: ({ children }: { children: React.ReactNode }) => (
-    <h5 className="text-lg font-semibold mb-3 mt-4 text-gray-900 dark:text-gray-100 leading-tight">
+    <h5 className="text-lg font-semibold mb-2 mt-4 text-gray-900 dark:text-gray-100 leading-tight">
       {children}
     </h5>
   ),
@@ -221,25 +211,70 @@ const mdxComponents = {
     </em>
   ),
   
-  // Code
-  code: ({ children, className, title, meta }: { children: string; className?: string; title?: string; meta?: string }) => {
-    // Inline code
+  // Code - Handle inline code only
+  code: ({ children, className, ...props }: CodeProps) => {
+    // Inline code (no language class)
     if (!className) {
       return (
-        <code className="px-1.5 py-0.5 text-[0.9em] bg-[#f6f8fa] dark:bg-[#21262d] text-[#24292e] dark:text-[#c9d1d9] rounded font-mono border border-[#d0d7de] dark:border-[#30363d]">
+        <code className="px-1.5 py-0.5 text-sm bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded font-mono border border-gray-200 dark:border-gray-700">
           {children}
         </code>
       )
     }
-    // Block code
-    return <CodeBlock className={className} title={title} meta={meta}>{children}</CodeBlock>
+    
+    // For code blocks, we'll handle them in the pre component
+    return (
+      <code className={className} {...props}>
+        {children}
+      </code>
+    )
   },
   
-  pre: ({ children }: { children: React.ReactNode }) => (
-    <div className="my-6">
-      {children}
-    </div>
-  ),
+  // Handle code blocks
+  pre: (preProps: PreProps) => {
+    const { children, ...restProps } = preProps
+    
+    // If children is a code element, extract its props
+    if (React.isValidElement(children) && children.type === 'code') {
+      const codeElementProps = children.props as {
+        className?: string;
+        children?: React.ReactNode;
+        [key: string]: unknown;
+      };
+      const { className, children: codeChildren, ...codeProps } = codeElementProps;
+      
+      const isTerminal = className?.includes('language-terminal') || 
+                        className?.includes('language-bash') || 
+                        className?.includes('language-shell')
+      
+      // Process the code content
+      const codeContent = getTextContent(codeChildren).trim()
+      
+      // Create a filtered props object with only the allowed props for EnhancedCodeBlock
+      const filteredProps: Record<string, unknown> = {};
+      const allowedProps = ['title', 'meta', 'filename', 'showLineNumbers'];
+      
+      Object.entries(codeProps).forEach(([key, value]) => {
+        if (allowedProps.includes(key)) {
+          filteredProps[key] = value;
+        }
+      });
+      
+      return (
+        <EnhancedCodeBlock
+          className={className || ''}
+          title={isTerminal ? 'Terminal' : undefined}
+          showLineNumbers={!isTerminal}
+          {...filteredProps}
+        >
+          {codeContent}
+        </EnhancedCodeBlock>
+      )
+    }
+    
+    // Fallback for other cases
+    return <pre {...restProps}>{children}</pre>
+  },
   
   // Blockquotes
   blockquote: ({ children }: { children: React.ReactNode }) => (
@@ -301,59 +336,168 @@ const mdxComponents = {
   Admonition,
 }
 
+// Fetch function for blog content
+const fetchBlogContent = async (slug: string): Promise<BlogContent> => {
+  try {
+    const response = await fetch(`/api/blog/${slug}`, {
+      headers: {
+        'Cache-Control': 'max-age=3600',
+      }
+    })
+    
+    if (!response.ok) throw new Error('Failed to fetch blog content')
+    const data = await response.json()
+    
+    return data as BlogContent
+  } catch (error) {
+    console.error('Error fetching blog content:', error)
+    throw error
+  }
+}
+
 export function BlogSheet({ post, onClose }: BlogSheetProps) {
   const [isVisible, setIsVisible] = useState(false)
   const [isFullScreen, setIsFullScreen] = useState(false)
-  const [mdxContent, setMdxContent] = useState<any>(null)
+  const [isContentMounted, setIsContentMounted] = useState(false)
   const y = useMotionValue(0)
   const constraintsRef = useRef<HTMLDivElement>(null)
+  const queryClient = useQueryClient()
+
+  // Query for blog content with optimized options
+  const { data: mdxContent, isLoading } = useQuery<BlogContent, Error>({
+    queryKey: ['blog', post?.slug],
+    queryFn: () => (post ? fetchBlogContent(post.slug) : Promise.reject('No post')),
+    enabled: !!post,
+    staleTime: Infinity,
+    gcTime: Infinity,
+    retry: false,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+  })
+
+  // Prefetch next and previous posts
+  useEffect(() => {
+    if (post) {
+      // Get all blog posts from cache or fetch them
+      const blogPosts = queryClient.getQueryData(['blogPosts']) as BlogPost[] || []
+      const currentIndex = blogPosts.findIndex(p => p.slug === post.slug)
+      
+      // Prefetch next post
+      if (currentIndex < blogPosts.length - 1) {
+        const nextPost = blogPosts[currentIndex + 1]
+        queryClient.prefetchQuery({
+          queryKey: ['blog', nextPost.slug],
+          queryFn: () => fetchBlogContent(nextPost.slug),
+          staleTime: Infinity,
+        })
+      }
+      
+      // Prefetch previous post
+      if (currentIndex > 0) {
+        const prevPost = blogPosts[currentIndex - 1]
+        queryClient.prefetchQuery({
+          queryKey: ['blog', prevPost.slug],
+          queryFn: () => fetchBlogContent(prevPost.slug),
+          staleTime: Infinity,
+        })
+      }
+    }
+  }, [post, queryClient])
 
   useEffect(() => {
     if (post) {
-      setIsVisible(true)
+      y.set(typeof window !== 'undefined' ? window.innerHeight : 1000)
       setIsFullScreen(false)
-      document.body.style.overflow = "hidden"
+      setIsContentMounted(false)
       
-      // Fetch MDX content when post changes
-      const fetchContent = async () => {
-        try {
-          const response = await fetch(`/api/blog/${post.slug}`)
-          const data = await response.json()
-          setMdxContent(data.content)
-        } catch (error) {
-          console.error('Failed to fetch blog content:', error)
-        }
-      }
-      fetchContent()
+      requestAnimationFrame(() => {
+        setIsVisible(true)
+        animate(y, 0, {
+          type: "spring",
+          damping: 30,
+          stiffness: 300,
+          onComplete: () => {
+            setIsContentMounted(true)
+          }
+        })
+      })
+      
+      document.body.style.overflow = "hidden"
     } else {
       document.body.style.overflow = "unset"
+      setIsContentMounted(false)
     }
 
     return () => {
       document.body.style.overflow = "unset"
     }
-  }, [post])
+  }, [post, y])
 
   const handleClose = () => {
     setIsVisible(false)
-    setTimeout(() => {
-      setIsFullScreen(false)
-      onClose()
-    }, 300)
+    setIsContentMounted(false)
+    animate(y, typeof window !== 'undefined' ? window.innerHeight : 1000, {
+      type: "spring",
+      damping: 30,
+      stiffness: 300,
+      onComplete: () => {
+        setIsFullScreen(false)
+        onClose()
+      }
+    })
   }
 
-  const handleDragEnd = (event: any, info: PanInfo) => {
-    const shouldClose = info.velocity.y > 500 || info.offset.y > 200
-    const shouldFullScreen = info.velocity.y < -500 || info.offset.y < -150
+  const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    const threshold = 200
+    const velocityThreshold = 1500
+    
+    const shouldClose = info.velocity.y > velocityThreshold || info.offset.y > threshold
+    const shouldFullScreen = info.velocity.y < -velocityThreshold || info.offset.y < -threshold
 
     if (shouldClose) {
+      setIsContentMounted(false)
       handleClose()
     } else if (shouldFullScreen && !isFullScreen) {
       setIsFullScreen(true)
-    } else if (!shouldClose && !shouldFullScreen) {
-      y.set(0)
+      animate(y, 0, {
+        type: "spring",
+        damping: 30,
+        stiffness: 300
+      })
+    } else {
+      animate(y, 0, {
+        type: "spring",
+        damping: 30,
+        stiffness: 300
+      })
     }
   }
+
+  // Memoize MDX content to prevent unnecessary re-renders
+  const MemoizedMDXContent = useMemo(() => {
+    if (!isContentMounted || !mdxContent?.content) return null;
+    
+    try {
+      return (
+        <div className="prose prose-invert max-w-none">
+          <MDXRemote 
+            {...mdxContent.content}
+            components={mdxComponents}
+          />
+        </div>
+      );
+    } catch (error) {
+      console.error('Error rendering MDX content:', error);
+      return (
+        <div className="p-4 bg-red-900/20 border border-red-500/50 rounded-md">
+          <p className="text-red-300">Error rendering content. Please try refreshing the page.</p>
+          <pre className="mt-2 text-xs text-red-400 overflow-auto">
+            {error instanceof Error ? error.message : String(error)}
+          </pre>
+        </div>
+      );
+    }
+  }, [mdxContent, isContentMounted])
 
   if (!post) return null
 
@@ -361,14 +505,14 @@ export function BlogSheet({ post, onClose }: BlogSheetProps) {
     <>
       <div
         className={`fixed inset-0 z-50 transition-all duration-300 ${
-          isVisible ? "bg-black/50 backdrop-blur-sm" : "bg-black/0 backdrop-blur-none"
+          isVisible ? "bg-black/50 backdrop-blur-sm" : "bg-black/0 backdrop-blur-none pointer-events-none"
         }`}
         onClick={(e) => e.target === e.currentTarget && handleClose()}
       >
         <motion.div
           ref={constraintsRef}
           className="absolute inset-0"
-          initial={{ y: "100%" }}
+          initial={false}
           animate={{
             y: isVisible ? (isFullScreen ? 0 : "30%") : "100%",
           }}
@@ -432,13 +576,16 @@ export function BlogSheet({ post, onClose }: BlogSheetProps) {
                   />
                 </div>
 
-                {/* MDX Content with Custom Styling */}
+                {/* MDX Content with Loading State */}
                 <article className="max-w-none prose-custom">
-                  {mdxContent && (
-                    <MDXRemote 
-                      {...mdxContent} 
-                      components={mdxComponents}
-                    />
+                  {isLoading ? (
+                    <div className="flex items-center justify-center py-12">
+                      <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                    </div>
+                  ) : (
+                    <div className="min-h-[50vh]">
+                      {MemoizedMDXContent}
+                    </div>
                   )}
                 </article>
               </div>
@@ -457,7 +604,35 @@ export function BlogSheet({ post, onClose }: BlogSheetProps) {
             )}
           </motion.div>
         </motion.div>
+        
+        {/* Show loading indicator */}
+        {isLoading && (
+          <div className="fixed inset-0 flex items-center justify-center z-50">
+            <div className="bg-background/80 backdrop-blur-sm rounded-lg p-4">
+              <Loader2 className="w-6 h-6 animate-spin text-primary" />
+            </div>
+          </div>
+        )}
       </div>
     </>
   )
+}
+
+// Export prefetch function with proper typing
+export const prefetchBlogContent = async (slug: string): Promise<BlogContent | undefined> => {
+  try {
+    const response = await fetch(`/api/blog/${slug}`, {
+      headers: {
+        'Cache-Control': 'max-age=3600',
+      }
+    })
+    
+    if (!response.ok) throw new Error('Failed to prefetch blog content')
+    const data = await response.json()
+    
+    return data as BlogContent
+  } catch (error) {
+    console.error('Error prefetching blog content:', error)
+    return undefined
+  }
 }

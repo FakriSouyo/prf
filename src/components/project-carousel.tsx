@@ -1,26 +1,42 @@
 "use client"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { EnhancedProjectCard } from "@/components/enhanced-project-card"
 
+interface Project {
+  id: string
+  title: string
+  subtitle: string
+  image: string
+  link: string
+  github?: string
+  description: string
+  technologies: string[]
+}
+
 interface ProjectCarouselProps {
-  projects: Array<{
-    title: string
-    subtitle: string
-    image: string
-    link: string
-    github?: string
-    description: string
-    technologies: string[]
-  }>
-  onProjectClick: (project: any) => void
+  projects: Project[]
+  onProjectClick: (project: Project) => void
 }
 
 export function ProjectCarousel({ projects, onProjectClick }: ProjectCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
-  const itemsPerPage = 2
+  const [isMobile, setIsMobile] = useState(false)
+  
+  // Check if mobile on mount and window resize
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768) // md breakpoint
+    }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
+  const itemsPerPage = isMobile ? 1 : 2
   const totalPages = Math.ceil(projects.length / itemsPerPage)
 
   const nextSlide = () => {
@@ -29,11 +45,6 @@ export function ProjectCarousel({ projects, onProjectClick }: ProjectCarouselPro
 
   const prevSlide = () => {
     setCurrentIndex((prev) => (prev - 1 + totalPages) % totalPages)
-  }
-
-  const getCurrentProjects = () => {
-    const start = currentIndex * itemsPerPage
-    return projects.slice(start, start + itemsPerPage)
   }
 
   return (
@@ -47,7 +58,7 @@ export function ProjectCarousel({ projects, onProjectClick }: ProjectCarouselPro
         >
           {Array.from({ length: totalPages }).map((_, pageIndex) => (
             <div key={pageIndex} className="w-full flex-shrink-0">
-              <div className="grid md:grid-cols-2 gap-8">
+              <div className={`grid ${isMobile ? 'grid-cols-1' : 'md:grid-cols-2'} gap-8`}>
                 {projects.slice(pageIndex * itemsPerPage, (pageIndex + 1) * itemsPerPage).map((project, index) => (
                   <EnhancedProjectCard
                     key={`${pageIndex}-${index}`}
@@ -62,7 +73,7 @@ export function ProjectCarousel({ projects, onProjectClick }: ProjectCarouselPro
         </motion.div>
       </div>
 
-      {/* Navigation - Only show if more than 2 projects */}
+      {/* Navigation - Only show if more than itemsPerPage projects */}
       {projects.length > itemsPerPage && (
         <div className="flex items-center justify-center mt-8 gap-4">
           {/* Previous Button */}

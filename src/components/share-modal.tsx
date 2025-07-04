@@ -135,31 +135,28 @@ export function ShareModal({ isOpen, onClose, title, url }: ShareModalProps) {
                 <div>
                   <label className="text-sm font-medium mb-3 block">Share to Social Media</label>
                   <div className="grid grid-cols-3 gap-3">
-                    {shareOptions.map((option) => {
-                      const IconComponent = option.icon
-                      return (
-                        <motion.button
-                          key={option.name}
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          onClick={option.action}
-                          className="flex flex-col items-center gap-2 p-3 rounded-lg border hover:bg-muted transition-colors group"
+                    {shareOptions.map((option) => (
+                      <motion.button
+                        key={option.name}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={option.action}
+                        className="flex flex-col items-center gap-2 p-3 rounded-lg border hover:bg-muted transition-colors group"
+                      >
+                        <div
+                          className={`w-10 h-10 rounded-full ${option.color} flex items-center justify-center text-white transition-colors`}
                         >
-                          <div
-                            className={`w-10 h-10 rounded-full ${option.color} flex items-center justify-center text-white transition-colors`}
-                          >
-                            {typeof option.icon === "function" && option.icon.length === 0 ? (
-                              <option.icon />
-                            ) : (
-                              <option.icon className="w-5 h-5" />
-                            )}
-                          </div>
-                          <span className="text-xs font-medium group-hover:text-foreground transition-colors">
-                            {option.name}
-                          </span>
-                        </motion.button>
-                      )
-                    })}
+                          {typeof option.icon === "function" && option.icon.length === 0 ? (
+                            <option.icon />
+                          ) : (
+                            <option.icon className="w-5 h-5" />
+                          )}
+                        </div>
+                        <span className="text-xs font-medium group-hover:text-foreground transition-colors">
+                          {option.name}
+                        </span>
+                      </motion.button>
+                    ))}
                   </div>
                 </div>
               </CardContent>

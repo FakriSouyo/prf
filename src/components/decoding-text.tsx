@@ -19,7 +19,7 @@ export function DecodingText({ text, className = "" }: DecodingTextProps) {
     let iteration = 0
 
     const interval = setInterval(() => {
-      setDisplayText((prev) =>
+      setDisplayText(() =>
         text
           .split("")
           .map((letter, index) => {
