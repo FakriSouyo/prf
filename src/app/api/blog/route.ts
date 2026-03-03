@@ -17,7 +17,7 @@ export async function GET() {
           const { data } = matter(fileContent)
           
           return {
-            slug: filename.replace('.mdx', ''),
+            slug: data.slug || filename.replace('.mdx', ''),
             title: data.title,
             subtitle: data.subtitle,
             description: data.description,

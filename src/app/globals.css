@@ -171,3 +171,87 @@
     }
   }
 }
+
+/* Prose Styles for Blog Content */
+.prose {
+  @apply max-w-none;
+}
+
+.prose h1 {
+  @apply text-3xl font-bold mb-6 mt-8;
+}
+
+.prose h2 {
+  @apply text-2xl font-semibold mb-4 mt-6;
+}
+
+.prose h3 {
+  @apply text-xl font-semibold mb-3 mt-5;
+}
+
+.prose h4 {
+  @apply text-lg font-semibold mb-2 mt-4;
+}
+
+.prose p {
+  @apply mb-4 leading-relaxed;
+}
+
+.prose ul {
+  @apply mb-4 pl-6;
+}
+
+.prose ol {
+  @apply mb-4 pl-6;
+}
+
+.prose li {
+  @apply mb-1;
+}
+
+.prose blockquote {
+  @apply border-l-4 border-primary pl-4 italic my-6;
+}
+
+.prose a {
+  @apply text-primary hover:underline;
+}
+
+.prose strong {
+  @apply font-semibold;
+}
+
+.prose em {
+  @apply italic;
+}
+
+.prose img {
+  @apply rounded-lg my-6;
+}
+
+.prose table {
+  @apply w-full border-collapse border border-border my-6;
+}
+
+.prose th {
+  @apply border border-border p-2 bg-muted font-semibold;
+}
+
+.prose td {
+  @apply border border-border p-2;
+}
+
+/* Line clamp utilities */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

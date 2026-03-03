@@ -50,15 +50,26 @@ export async function GET(
       return NextResponse.json({ error: 'Slug is required' }, { status: 400 })
     }
 
-    const filePath = path.join(POSTS_PATH, `${slug}.mdx`)
+    // Find the file that matches the slug
+    const files = await fs.readdir(POSTS_PATH)
+    let targetFile = null
     
-    // Check if file exists
-    try {
-      await fs.access(filePath)
-    } catch {
+    for (const filename of files) {
+      if (!filename.endsWith('.mdx')) continue
+      const filePath = path.join(POSTS_PATH, filename)
+      const fileContent = await fs.readFile(filePath, 'utf8')
+      const { data } = matter(fileContent)
+      if (data.slug === slug) {
+        targetFile = filename
+        break
+      }
+    }
+    
+    if (!targetFile) {
       return NextResponse.json({ error: 'Blog post not found' }, { status: 404 })
     }
     
+    const filePath = path.join(POSTS_PATH, targetFile)
     const fileContent = await fs.readFile(filePath, 'utf8')
     const { data, content } = matter(fileContent)
     

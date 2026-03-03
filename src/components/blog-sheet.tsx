@@ -1,7 +1,7 @@
 "use client"
 import { useState, useEffect, useRef, useMemo } from "react"
 import { motion, useMotionValue, type PanInfo, animate } from "framer-motion"
-import { X, Calendar, AlertTriangle, Info, Lightbulb, AlertCircle, Loader2 } from "lucide-react"
+import { X, Calendar, AlertTriangle, Info, Lightbulb, AlertCircle, Loader2, Share2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import type { BlogPost } from "@/data/blog"
@@ -11,6 +11,7 @@ import { EnhancedCodeBlock } from './enhanced-codeblock'
 import { MDXRemote } from 'next-mdx-remote'
 import type { MDXRemoteSerializeResult } from 'next-mdx-remote'
 import React from "react"
+import { toast } from "sonner"
 
 interface BlogSheetProps {
   post: BlogPost | null
@@ -447,6 +448,30 @@ export function BlogSheet({ post, onClose }: BlogSheetProps) {
     })
   }
 
+  const handleShare = async () => {
+    if (!post) return
+    
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: post.title,
+          text: post.description,
+          url: window.location.href,
+        })
+      } catch (error) {
+        console.error('Error sharing:', error)
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(window.location.href)
+        toast.success('Link copied to clipboard!')
+      } catch (error) {
+        console.error('Error copying to clipboard:', error)
+        toast.error('Failed to copy link')
+      }
+    }
+  }
+
   const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     const threshold = 200
     const velocityThreshold = 1500
@@ -540,9 +565,14 @@ export function BlogSheet({ post, onClose }: BlogSheetProps) {
                   <p className="text-sm text-muted-foreground">{post.subtitle}</p>
                 </div>
               </div>
-              <Button variant="ghost" size="sm" onClick={handleClose}>
-                <X className="w-4 h-4" />
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button variant="ghost" size="sm" onClick={handleShare}>
+                  <Share2 className="w-4 h-4" />
+                </Button>
+                <Button variant="ghost" size="sm" onClick={handleClose}>
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
 
             {/* Content */}

@@ -13,6 +13,7 @@ import { useState, useEffect, useCallback } from "react"
 import { ProjectModal } from "@/components/project-modal"
 import { motion } from "framer-motion"
 import { MapPin, Calendar, ChevronLeft, ChevronRight, Download } from "lucide-react"
+import Link from "next/link"
 import { ProjectCarousel } from "@/components/project-carousel"
 import { Badge } from "@/components/ui/badge"
 import { toast } from "sonner"
@@ -267,6 +268,11 @@ export default function Portfolio() {
                   >
                     <ChevronRight className="w-4 h-4" />
                   </Button>
+                  <Link href="/blog">
+                    <Button variant="outline" size="sm">
+                      View All Posts
+                    </Button>
+                  </Link>
                 </div>
               </div>
 

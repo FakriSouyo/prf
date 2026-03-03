@@ -1,4 +1,5 @@
 ---
+slug: "web-performance-optimization"
 title: "Complete Web Performance Optimization Guide"
 subtitle: "Building Lightning Fast Websites with Modern Techniques"
 description: "Master essential techniques and best practices for optimizing web performance, including Core Web Vitals, advanced caching strategies, and modern development approaches."
@@ -13,9 +14,7 @@ status: "published"
 
 Performance is a **crucial aspect** of web development that directly impacts user experience, SEO rankings, and business metrics. In today's fast-paced digital world, users expect websites to load in under 3 seconds.
 
-<Admonition type="important">
-According to Google research, 53% of mobile users abandon sites that take longer than 3 seconds to load. Performance optimization isn't just a technical concern—it's a business imperative.
-</Admonition>
+> **Important**: According to Google research, 53% of mobile users abandon sites that take longer than 3 seconds to load. Performance optimization isn't just a technical concern—it's a business imperative.
 
 ## Core Web Vitals Detailed Analysis
 
@@ -49,9 +48,7 @@ new PerformanceObserver((entryList) => {
 }).observe({ entryTypes: ['largest-contentful-paint'], buffered: true });
 ```
 
-<Admonition type="tip">
-To improve LCP, focus on optimizing server response times, render-blocking resources, and client-side rendering issues.
-</Admonition>
+> **Tip**: To improve LCP, focus on optimizing server response times, render-blocking resources, and client-side rendering issues.
 
 ### First Input Delay (FID)
 FID measures the time from when a user first interacts with your site (clicks a link, taps a button, etc.) to the time when the browser is able to respond to that interaction.
@@ -163,9 +160,7 @@ export function AdvancedOptimizedImage({ src, alt, priority = false }) {
 }
 ```
 
-<Admonition type="note">
-Modern browsers support WebP and AVIF formats which can reduce image sizes by 25-50% compared to JPEG/PNG without quality loss.
-</Admonition>
+> **Note**: Modern browsers support WebP and AVIF formats which can reduce image sizes by 25-50% compared to JPEG/PNG without quality loss.
 
 ### 2. Smart Code Splitting Strategies
 
@@ -383,9 +378,7 @@ if (typeof window !== 'undefined') {
 
 ### 2. Critical Rendering Path Optimization
 
-<Admonition type="warning">
-Render-blocking resources can significantly impact your page's First Contentful Paint (FCP) and LCP scores.
-</Admonition>
+> **Warning**: Render-blocking resources can significantly impact your page's First Contentful Paint (FCP) and LCP scores.
 
 ```html
 <!-- Optimized resource loading -->
@@ -618,9 +611,7 @@ self.addEventListener('fetch', event => {
 - [ ] **TTFB < 600ms** - Optimize server performance, use CDN
 - [ ] **Bundle size < 250KB** - Code splitting, tree shaking, remove unused dependencies
 
-<Admonition type="caution">
-Avoid premature optimization! Profile your application first to identify actual bottlenecks rather than optimizing based on assumptions.
-</Admonition>
+> **Caution**: Avoid premature optimization! Profile your application first to identify actual bottlenecks rather than optimizing based on assumptions.
 
 ### Final Thoughts
 
