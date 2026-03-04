@@ -3,45 +3,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Calendar } from 'lucide-react'
-import Image from 'next/image'
 import Link from 'next/link'
+import Image from 'next/image'
+import { getAllPosts } from '@/lib/blog'
 
 export const metadata: Metadata = {
   title: 'Blog - Personal Portfolio',
   description: 'Read my latest articles about web development, technology, and programming insights.',
 }
 
-interface BlogPost {
-  slug: string
-  title: string
-  subtitle: string
-  description: string
-  publishedAt: string
-  tags: string[]
-  featured?: boolean
-  image: string
-  status: 'draft' | 'published'
-}
-
-async function getBlogPosts(): Promise<BlogPost[]> {
-  try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/blog`, {
-      cache: 'no-store'
-    })
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch blog posts')
-    }
-
-    return response.json()
-  } catch (error) {
-    console.error('Error fetching blog posts:', error)
-    return []
-  }
-}
-
 export default async function BlogPage() {
-  const posts = await getBlogPosts()
+  const posts = await getAllPosts()
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -61,7 +33,7 @@ export default async function BlogPage() {
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {posts.map((post) => (
               <Card key={post.slug} className="group hover:shadow-lg transition-shadow">
-                <div className="aspect-video overflow-hidden rounded-t-lg">
+                <div className="relative aspect-video overflow-hidden rounded-t-lg">
                   <Image
                     src={post.image}
                     alt={post.title}

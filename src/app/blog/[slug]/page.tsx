@@ -8,71 +8,25 @@ import { Calendar, ArrowLeft, Clock } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ShareButton } from '@/components/share-button'
-
-interface BlogPost {
-  content: { compiledSource: string }
-  frontmatter: {
-    slug: string
-    title: string
-    subtitle: string
-    description: string
-    publishedAt: string
-    tags: string[]
-    featured?: boolean
-    image: string
-    status: 'draft' | 'published'
-  }
-}
+import { getAllPosts, getPostBySlug } from '@/lib/blog'
+import remarkGfm from 'remark-gfm'
+import rehypePrettyCode from 'rehype-pretty-code'
 
 interface Props {
   params: Promise<{ slug: string }>
 }
 
-async function getBlogPost(slug: string): Promise<BlogPost | null> {
-  try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/blog/${slug}`, {
-      cache: 'no-store'
-    })
-
-    if (!response.ok) {
-      return null
-    }
-
-    return response.json()
-  } catch (error) {
-    console.error('Error fetching blog post:', error)
-    return null
-  }
-}
-
 export async function generateStaticParams() {
-  try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/blog`, {
-      cache: 'no-store'
-    })
-
-    if (!response.ok) {
-      return []
-    }
-
-    const posts = await response.json()
-    return posts.map((post: { slug: string }) => ({
-      slug: post.slug,
-    }))
-  } catch (error) {
-    console.error('Error generating static params:', error)
-    return []
-  }
+  const posts = await getAllPosts()
+  return posts.map(post => ({ slug: post.slug }))
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
-  const post = await getBlogPost(slug)
+  const post = await getPostBySlug(slug)
 
   if (!post) {
-    return {
-      title: 'Blog Post Not Found',
-    }
+    return { title: 'Blog Post Not Found' }
   }
 
   return {
@@ -88,13 +42,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function BlogPostPage({ params }: Props) {
   const { slug } = await params
-  const post = await getBlogPost(slug)
+  const post = await getPostBySlug(slug)
 
   if (!post) {
     notFound()
   }
 
-  const readingTime = Math.ceil(post.content.compiledSource.split(' ').length / 200)
+  const wordCount = post.source.split(/\s+/).length
+  const readingTime = Math.ceil(wordCount / 200)
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -109,7 +64,7 @@ export default async function BlogPostPage({ params }: Props) {
 
         {/* Hero Section */}
         <div className="mb-8">
-          <div className="aspect-video overflow-hidden rounded-lg mb-6">
+          <div className="relative aspect-video overflow-hidden rounded-lg mb-6">
             <Image
               src={post.frontmatter.image}
               alt={post.frontmatter.title}
@@ -151,7 +106,15 @@ export default async function BlogPostPage({ params }: Props) {
         <Card className="mb-8">
           <CardContent className="p-6">
             <div className="prose prose-lg max-w-none">
-              <MDXRemote source={post.content.compiledSource} />
+              <MDXRemote
+                source={post.source}
+                options={{
+                  mdxOptions: {
+                    remarkPlugins: [remarkGfm],
+                    rehypePlugins: [[rehypePrettyCode, { theme: 'github-dark' }]],
+                  },
+                }}
+              />
             </div>
           </CardContent>
         </Card>
