@@ -21,7 +21,7 @@ export const experiences: Experience[] = [
   },
   {
     id: "gama-studio-2024",
-    role: "System Admin",
+    role: "Backend Enginner",
     company: "Gama Studio",
     period: "Jan 2024 - Jun 2024",
     description: "Managing cloud infrastructure and implementing DevOps practices.",
