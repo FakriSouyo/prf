@@ -2,7 +2,8 @@ import { Metadata } from 'next'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Calendar, Clock, Tag } from 'lucide-react'
+import { Calendar } from 'lucide-react'
+import Image from 'next/image'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
@@ -27,11 +28,11 @@ async function getBlogPosts(): Promise<BlogPost[]> {
     const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/blog`, {
       cache: 'no-store'
     })
-    
+
     if (!response.ok) {
       throw new Error('Failed to fetch blog posts')
     }
-    
+
     return response.json()
   } catch (error) {
     console.error('Error fetching blog posts:', error)
@@ -61,10 +62,11 @@ export default async function BlogPage() {
             {posts.map((post) => (
               <Card key={post.slug} className="group hover:shadow-lg transition-shadow">
                 <div className="aspect-video overflow-hidden rounded-t-lg">
-                  <img
+                  <Image
                     src={post.image}
                     alt={post.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 </div>
                 <CardHeader>
@@ -89,7 +91,7 @@ export default async function BlogPage() {
                   <p className="text-sm text-muted-foreground mb-4 line-clamp-3">
                     {post.description}
                   </p>
-                  
+
                   <div className="flex flex-wrap gap-2 mb-4">
                     {post.tags.slice(0, 3).map((tag) => (
                       <Badge key={tag} variant="secondary" className="text-xs">
@@ -97,7 +99,7 @@ export default async function BlogPage() {
                       </Badge>
                     ))}
                   </div>
-                  
+
                   <Link href={`/blog/${post.slug}`}>
                     <Button className="w-full" variant="outline">
                       Read More

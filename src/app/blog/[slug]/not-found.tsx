@@ -20,7 +20,7 @@ export default function BlogNotFound() {
               <FileText className="w-16 h-16 text-muted-foreground" />
               <h1 className="text-3xl font-bold">Blog Post Not Found</h1>
               <p className="text-muted-foreground text-lg">
-                The blog post you're looking for doesn't exist or has been moved.
+                The blog post you&apos;re looking for doesn&apos;t exist or has been moved.
               </p>
               <Link href="/blog">
                 <Button className="mt-4">

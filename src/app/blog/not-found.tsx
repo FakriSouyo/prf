@@ -20,7 +20,7 @@ export default function BlogNotFound() {
               <FileText className="w-16 h-16 text-muted-foreground" />
               <h1 className="text-3xl font-bold">Blog Not Found</h1>
               <p className="text-muted-foreground text-lg">
-                The blog section you're looking for doesn't exist.
+                The blog section you&apos;re looking for doesn&apos;t exist.
               </p>
               <Link href="/">
                 <Button className="mt-4">

@@ -6,10 +6,11 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Calendar, ArrowLeft, Clock } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { ShareButton } from '@/components/share-button'
 
 interface BlogPost {
-  content: any
+  content: { compiledSource: string }
   frontmatter: {
     slug: string
     title: string
@@ -32,11 +33,11 @@ async function getBlogPost(slug: string): Promise<BlogPost | null> {
     const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/blog/${slug}`, {
       cache: 'no-store'
     })
-    
+
     if (!response.ok) {
       return null
     }
-    
+
     return response.json()
   } catch (error) {
     console.error('Error fetching blog post:', error)
@@ -49,13 +50,13 @@ export async function generateStaticParams() {
     const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/blog`, {
       cache: 'no-store'
     })
-    
+
     if (!response.ok) {
       return []
     }
-    
+
     const posts = await response.json()
-    return posts.map((post: any) => ({
+    return posts.map((post: { slug: string }) => ({
       slug: post.slug,
     }))
   } catch (error) {
@@ -67,13 +68,13 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const post = await getBlogPost(slug)
-  
+
   if (!post) {
     return {
       title: 'Blog Post Not Found',
     }
   }
-  
+
   return {
     title: `${post.frontmatter.title} - Blog`,
     description: post.frontmatter.description,
@@ -88,7 +89,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function BlogPostPage({ params }: Props) {
   const { slug } = await params
   const post = await getBlogPost(slug)
-  
+
   if (!post) {
     notFound()
   }
@@ -109,13 +110,14 @@ export default async function BlogPostPage({ params }: Props) {
         {/* Hero Section */}
         <div className="mb-8">
           <div className="aspect-video overflow-hidden rounded-lg mb-6">
-            <img
+            <Image
               src={post.frontmatter.image}
               alt={post.frontmatter.title}
-              className="w-full h-full object-cover"
+              fill
+              className="object-cover"
             />
           </div>
-          
+
           <div className="space-y-4">
             <div className="flex items-center gap-4 text-sm text-muted-foreground">
               <div className="flex items-center gap-2">
@@ -131,10 +133,10 @@ export default async function BlogPostPage({ params }: Props) {
                 {readingTime} min read
               </div>
             </div>
-            
+
             <h1 className="text-4xl font-bold">{post.frontmatter.title}</h1>
             <p className="text-xl text-muted-foreground">{post.frontmatter.subtitle}</p>
-            
+
             <div className="flex flex-wrap gap-2">
               {post.frontmatter.tags.map((tag) => (
                 <Badge key={tag} variant="secondary">
@@ -164,7 +166,7 @@ export default async function BlogPostPage({ params }: Props) {
                   If you found this article helpful, consider sharing it with others.
                 </p>
               </div>
-              <ShareButton 
+              <ShareButton
                 title={post.frontmatter.title}
                 description={post.frontmatter.description}
               />
